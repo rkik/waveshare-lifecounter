@@ -14,17 +14,21 @@
 #include "SensorPCF85063.hpp"
 #include "HWCDC.h"
 #include <ui.h>
+#include "XPowersLib.h" // For power management IC (PMU)
 
 // ----------------------------------------------------------------------------
 // Definitions
 // ----------------------------------------------------------------------------
-HWCDC USBSerial;
 #define EXAMPLE_LVGL_TICK_PERIOD_MS 2
-Adafruit_XCA9554 expander;
 
 // ----------------------------------------------------------------------------
 // Global Variables
 // ----------------------------------------------------------------------------
+// Global variables from your working code (brightness, PMU flags)
+int bri[4] = {100, 150, 200, 250}; // Brightness levels
+int b = 0; // Current brightness index - set to lowest for better battery life
+Adafruit_XCA9554 expander;
+HWCDC USBSerial;
 
 // ----------------------------------------------------------------------------
 // Local Variables
@@ -55,9 +59,14 @@ const unsigned long DEBOUNCE_TIME_MS = 500;
 const unsigned long BATTERY_UPDATE_INTERVAL_MS = 30000; // Update battery every 30 seconds
 lv_timer_t *batteryUpdateTimer = nullptr;
 
+// PMU object
+XPowersPMU power;
+
 // ----------------------------------------------------------------------------
 // Static Function Prototypes (Declarations)
 // ----------------------------------------------------------------------------
+static void rtc_init(void);
+static void pmu_init(void);
 static void adcOn();
 static void adcOff();
 static void Arduino_IIC_Touch_Interrupt(void);
@@ -90,98 +99,8 @@ std::unique_ptr<Arduino_IIC> FT3168(new Arduino_FT3x68(IIC_Bus, FT3168_DEVICE_AD
                                                        DRIVEBUS_DEFAULT_VALUE, TP_INT, Arduino_IIC_Touch_Interrupt));
 
 // ----------------------------------------------------------------------------
-// Functions
+// Global Functions
 // ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-static void Arduino_IIC_Touch_Interrupt(void) {
-  FT3168->IIC_Interrupt_Flag = true;
-}
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-#if LV_USE_LOG != 0
-/* Serial debugging */
-static void my_print(const char *buf) {
-  USBSerial.printf(buf);
-  USBSerial.flush();
-}
-#endif
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-/* Display flushing */
-static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
-  uint32_t w = (area->x2 - area->x1 + 1);
-  uint32_t h = (area->y2 - area->y1 + 1);
-
-#if (LV_COLOR_16_SWAP != 0)
-  gfx->draw16bitBeRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
-#else
-  gfx->draw16bitRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
-#endif
-
-  lv_disp_flush_ready(disp);
-}
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-void example_increase_lvgl_tick(void *arg) {
-  /* Tell LVGL how many milliseconds has elapsed */
-  lv_tick_inc(EXAMPLE_LVGL_TICK_PERIOD_MS);
-}
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-static uint8_t count = 0;
-void example_increase_reboot(void *arg) {
-  count++;
-  if (count == 30) {
-    esp_restart();
-  }
-}
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-/*Read the touchpad*/
-void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
-  int32_t touchX = FT3168->IIC_Read_Device_Value(FT3168->Arduino_IIC_Touch::Value_Information::TOUCH_COORDINATE_X);
-  int32_t touchY = FT3168->IIC_Read_Device_Value(FT3168->Arduino_IIC_Touch::Value_Information::TOUCH_COORDINATE_Y);
-
-  if (FT3168->IIC_Interrupt_Flag == true) {
-    FT3168->IIC_Interrupt_Flag = false;
-    data->state = LV_INDEV_STATE_PR;
-
-    /*Set the coordinates*/
-    data->point.x = touchX;
-    data->point.y = touchY;
-
-    USBSerial.print("Data x ");
-    USBSerial.print(touchX);
-
-    USBSerial.print("Data y ");
-    USBSerial.println(touchY);
-  } else {
-    data->state = LV_INDEV_STATE_REL;
-  }
-}
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-static void btn_event_cb(lv_event_t * e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * btn = lv_event_get_target(e);
-    if(code == LV_EVENT_CLICKED) {
-        // static uint8_t cnt = 0;
-        lifeCount++;
-
-        /*Get the first child of the button which is the label and change its text*/
-        lv_obj_t * label = lv_obj_get_child(btn, 0);
-        lv_label_set_text_fmt(label, "Button: %d", lifeCount);
-    }
-}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -195,25 +114,8 @@ void setup() {
       ;
   }
 
-  expander.pinMode(4, OUTPUT);
-  expander.pinMode(5, OUTPUT);
-  expander.digitalWrite(4, 1);
-  expander.digitalWrite(5, 1);
-  if (!rtc.begin(Wire, IIC_SDA, IIC_SCL)) {
-    USBSerial.println("Failed to find PCF8563 - check your wiring!");
-    while (1) {
-      delay(1000);
-    }
-  }
-
-  uint16_t year = 2024;
-  uint8_t month = 9;
-  uint8_t day = 24;
-  uint8_t hour = 11;
-  uint8_t minute = 9;
-  uint8_t second = 41;
-
-  rtc.setDateTime(year, month, day, hour, minute, second);
+  rtc_init();
+  pmu_init();
 
   // pinMode(LCD_EN, OUTPUT);
   // digitalWrite(LCD_EN, HIGH);
@@ -282,6 +184,15 @@ void setup() {
   lv_obj_add_event_cb(ui_timer, timer_button_cb, LV_EVENT_ALL, NULL);
   lv_obj_add_event_cb(ui_lifeUp, life_up_cb, LV_EVENT_ALL, NULL);
   lv_obj_add_event_cb(ui_lifeDown, life_down_cb, LV_EVENT_CLICKED, NULL);
+
+  // Initial display updates
+  update_minutes_display();
+  update_life_display();
+  update_battery_display();
+
+  // Create LVGL timers
+  countdownTimer = lv_timer_create(countdown_task, 1000, NULL);
+  batteryUpdateTimer = lv_timer_create(battery_update_task, BATTERY_UPDATE_INTERVAL_MS, NULL);
 }
 
 // ----------------------------------------------------------------------------
@@ -289,6 +200,144 @@ void setup() {
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
   delay(5);
+}
+
+// ----------------------------------------------------------------------------
+// Local Functions
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void rtc_init(void) {
+  expander.pinMode(4, OUTPUT);
+  expander.pinMode(5, OUTPUT);
+  expander.digitalWrite(4, 1);
+  expander.digitalWrite(5, 1);
+  if (!rtc.begin(Wire, IIC_SDA, IIC_SCL)) {
+    USBSerial.println("Failed to find PCF8563 - check your wiring!");
+    while (1) {
+      delay(1000);
+    }
+  }
+
+  uint16_t year = 2024;
+  uint8_t month = 9;
+  uint8_t day = 24;
+  uint8_t hour = 11;
+  uint8_t minute = 9;
+  uint8_t second = 41;
+
+  rtc.setDateTime(year, month, day, hour, minute, second);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void pmu_init(void) {
+  // Initialize PMU
+  bool result = power.begin(Wire, AXP2101_SLAVE_ADDRESS, IIC_SDA, IIC_SCL);
+  if (result == false) {
+    USBSerial.println("PMU is not online...");
+    while (1) delay(50);
+  }
+
+  // PMU configuration for wake-up from power key press
+  power.disableIRQ(XPOWERS_AXP2101_ALL_IRQ);
+  power.setChargeTargetVoltage(3);
+  power.clearIrqStatus();
+
+  // The enableIRQ function expects one argument at a time
+  power.enableIRQ(XPOWERS_AXP2101_PKEY_SHORT_IRQ);
+  power.enableIRQ(XPOWERS_AXP2101_VBUS_INSERT_IRQ);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void Arduino_IIC_Touch_Interrupt(void) {
+  FT3168->IIC_Interrupt_Flag = true;
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+#if LV_USE_LOG != 0
+/* Serial debugging */
+static void my_print(const char *buf) {
+  USBSerial.printf(buf);
+  USBSerial.flush();
+}
+#endif
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+/* Display flushing */
+static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
+  uint32_t w = (area->x2 - area->x1 + 1);
+  uint32_t h = (area->y2 - area->y1 + 1);
+
+#if (LV_COLOR_16_SWAP != 0)
+  gfx->draw16bitBeRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
+#else
+  gfx->draw16bitRGBBitmap(area->x1, area->y1, (uint16_t *)&color_p->full, w, h);
+#endif
+
+  lv_disp_flush_ready(disp);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void example_increase_lvgl_tick(void *arg) {
+  /* Tell LVGL how many milliseconds has elapsed */
+  lv_tick_inc(EXAMPLE_LVGL_TICK_PERIOD_MS);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static uint8_t count = 0;
+void example_increase_reboot(void *arg) {
+  count++;
+  if (count == 30) {
+    esp_restart();
+  }
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+/*Read the touchpad*/
+static void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
+  int32_t touchX = FT3168->IIC_Read_Device_Value(FT3168->Arduino_IIC_Touch::Value_Information::TOUCH_COORDINATE_X);
+  int32_t touchY = FT3168->IIC_Read_Device_Value(FT3168->Arduino_IIC_Touch::Value_Information::TOUCH_COORDINATE_Y);
+
+  if (FT3168->IIC_Interrupt_Flag == true) {
+    FT3168->IIC_Interrupt_Flag = false;
+    data->state = LV_INDEV_STATE_PR;
+
+    /*Set the coordinates*/
+    data->point.x = touchX;
+    data->point.y = touchY;
+
+    USBSerial.print("Data x ");
+    USBSerial.print(touchX);
+
+    USBSerial.print("Data y ");
+    USBSerial.println(touchY);
+  } else {
+    data->state = LV_INDEV_STATE_REL;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void btn_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * btn = lv_event_get_target(e);
+    if(code == LV_EVENT_CLICKED) {
+        // static uint8_t cnt = 0;
+        lifeCount++;
+
+        /*Get the first child of the button which is the label and change its text*/
+        lv_obj_t * label = lv_obj_get_child(btn, 0);
+        lv_label_set_text_fmt(label, "Button: %d", lifeCount);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -322,6 +371,16 @@ static void countdown_task(lv_timer_t *timer) {
     countdownSeconds--;
     update_minutes_display();
   }
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+void battery_update_task(lv_timer_t *timer) {
+  // Temporarily enable ADC to get the measurement
+  // adcOn();
+  // delay(100); // Small delay to allow ADC to stabilize
+  // update_battery_display();
+  // adcOff(); // Disable ADC immediately after measurement
 }
 
 // ----------------------------------------------------------------------------
