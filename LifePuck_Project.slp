@@ -1,0 +1,12 @@
+{
+    "uiExportFolderPath": "F:/projects/ESP32-C6-Touch-AMOLED-1.8/LifeCounter/SquareLine_Project/./libraries/ui/src",
+    "projectExportFolderPath": "F:/projects/ESP32-C6-Touch-AMOLED-1.8/LifeCounter/SquareLine_Project",
+    "drive_stdio": "-",
+    "drive_stdio_path": "",
+    "drive_posix": "-",
+    "drive_posix_path": "",
+    "drive_win32": "-",
+    "drive_win32_path": "",
+    "drive_fatfs": "-",
+    "drive_fatfs_path": ""
+}
