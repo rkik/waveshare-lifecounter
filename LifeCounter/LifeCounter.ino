@@ -19,8 +19,8 @@
 // ----------------------------------------------------------------------------
 // Definitions
 // ----------------------------------------------------------------------------
-#define EXAMPLE_LVGL_TICK_PERIOD_MS 2
-
+#define DISPLAY_BUFFER_DIVIDER (20)
+#define DISPLAY_BUFFER_SIZE ((LCD_WIDTH * LCD_HEIGHT) / DISPLAY_BUFFER_DIVIDER)
   
 #define DBG_ENTER(x) {USBSerial.print("Enter "); USBSerial.println(x);}
 #define DBG_EXIT(x) {USBSerial.print("Exit "); USBSerial.println(x);}
@@ -38,7 +38,7 @@ HWCDC USBSerial;
 // Local Variables
 // ----------------------------------------------------------------------------
 static lv_disp_draw_buf_t draw_buf;
-static lv_color_t buf[LCD_WIDTH * LCD_HEIGHT / 10];
+static lv_color_t buf[DISPLAY_BUFFER_SIZE];
 
 lv_obj_t *label;  // Global label object
 SensorPCF85063 rtc;
@@ -55,6 +55,7 @@ lv_timer_t *countdownTimer = nullptr; // LVGL timer for countdown
 uint32_t dbg_counter = 0;
 
 // --- Timestamps for long press debounce ---
+static uint32_t pressTime;
 unsigned long lastTimerLongPressTime = 0;
 unsigned long lastLifeUpLongPressTime = 0;
 const unsigned long DEBOUNCE_TIME_MS = 500;
@@ -119,7 +120,6 @@ void setup() {
       ;
   }
 
-  rtc_init();
   pmu_init();
 
   // pinMode(LCD_EN, OUTPUT);
@@ -130,7 +130,7 @@ void setup() {
   USBSerial.println("FT3168 initialization successfully");
 
   gfx->begin();
-  gfx->setBrightness(200);
+  gfx->setBrightness(100);
 
   String LVGL_Arduino = "Hello Arduino! ";
   LVGL_Arduino += String('V') + lv_version_major() + "." + lv_version_minor() + "." + lv_version_patch();
@@ -148,7 +148,7 @@ void setup() {
                                  FT3168->Arduino_IIC_Touch::Device_Mode::TOUCH_POWER_MONITOR);
 
 
-  lv_disp_draw_buf_init(&draw_buf, buf, NULL, LCD_WIDTH * LCD_HEIGHT / 10);
+  lv_disp_draw_buf_init(&draw_buf, buf, NULL, DISPLAY_BUFFER_SIZE);
 
   /*Initialize the display*/
   static lv_disp_drv_t disp_drv;
@@ -168,24 +168,15 @@ void setup() {
   indev_drv.long_press_time = 1000;
   lv_indev_drv_register(&indev_drv);
 
-  // Create LVGL tick timer
-  const esp_timer_create_args_t lvgl_tick_timer_args = {
-    .callback = &example_increase_lvgl_tick,
-    .name = "lvgl_tick"
-  };
-
-  esp_timer_handle_t lvgl_tick_timer = NULL;
-  esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer);
-  esp_timer_start_periodic(lvgl_tick_timer, EXAMPLE_LVGL_TICK_PERIOD_MS * 1000);
-
   // Initialize the UI created with SquareLine Studio
   ui_init();
 
   // Add a single event callback to the timer and lifeUp buttons to handle all events.
   // The logic inside the callback now correctly distinguishes between click and long press.
-  lv_obj_add_event_cb(ui_timer, timer_button_cb, LV_EVENT_ALL, NULL);
-  lv_obj_add_event_cb(ui_lifeUp, life_up_click_cb, LV_EVENT_CLICKED, NULL);
-  lv_obj_add_event_cb(ui_lifeUp, life_up_long_cb, LV_EVENT_LONG_PRESSED , NULL);
+  lv_obj_add_event_cb(ui_timer, timer_button_cb, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_timer, timer_button_cb, LV_EVENT_LONG_PRESSED, NULL);
+  lv_obj_add_event_cb(ui_lifeUp, life_up_cb, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_lifeUp, life_up_cb, LV_EVENT_LONG_PRESSED , NULL);
   lv_obj_add_event_cb(ui_lifeDown, life_down_cb, LV_EVENT_CLICKED, NULL);
 
   // Initial display updates
@@ -202,7 +193,7 @@ void setup() {
 // ----------------------------------------------------------------------------
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
-  delay(5);
+  delay(3);
 }
 
 // ----------------------------------------------------------------------------
@@ -253,8 +244,8 @@ static void pmu_init(void) {
   power.enableIRQ(XPOWERS_AXP2101_VBUS_INSERT_IRQ);
   
   // Set up deep sleep to wake on power button press. - TODO get correct GPIO
-  //const gpio_num_t PMU_IRQ_GPIO = GPIO_NUM_16;
-  //esp_sleep_enable_ext0_wakeup(PMU_IRQ_GPIO, 0); // 0 = low level wakeup
+  // const gpio_num_t PMU_IRQ_GPIO = GPIO_NUM_16;
+  // esp_sleep_enable_ext1_wakeup(PMU_IRQ_GPIO, 0); // 0 = low level wakeup
 
   // Initial ADC state is OFF for power saving
   adcOff();
@@ -264,6 +255,7 @@ static void pmu_init(void) {
 // ----------------------------------------------------------------------------
 static void Arduino_IIC_Touch_Interrupt(void) {
   FT3168->IIC_Interrupt_Flag = true;
+  pressTime = millis();
 }
 
 // ----------------------------------------------------------------------------
@@ -294,13 +286,6 @@ static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-static void example_increase_lvgl_tick(void *arg) {
-  /* Tell LVGL how many milliseconds has elapsed */
-  lv_tick_inc(EXAMPLE_LVGL_TICK_PERIOD_MS);
-}
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 static uint8_t count = 0;
 void example_increase_reboot(void *arg) {
   count++;
@@ -315,7 +300,10 @@ void example_increase_reboot(void *arg) {
 static void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
   int32_t touchX = FT3168->IIC_Read_Device_Value(FT3168->Arduino_IIC_Touch::Value_Information::TOUCH_COORDINATE_X);
   int32_t touchY = FT3168->IIC_Read_Device_Value(FT3168->Arduino_IIC_Touch::Value_Information::TOUCH_COORDINATE_Y);
+  static lv_indev_state_t lastState = LV_INDEV_STATE_REL;
+  uint32_t readTime = millis();
 
+  // DBG_ENTER("my_touchpad_read")
   if (FT3168->IIC_Interrupt_Flag == true) {
     FT3168->IIC_Interrupt_Flag = false;
     data->state = LV_INDEV_STATE_PR;
@@ -329,11 +317,13 @@ static void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data
 
     // USBSerial.print("Data y ");
     // USBSerial.println(touchY);
-    USBSerial.println("pressed");
-  } else {
-    USBSerial.println("released");
+  } else if ((readTime - 100) > pressTime) {
     data->state = LV_INDEV_STATE_REL;
+  } else {
+    data->state = lastState;
   }
+
+  lastState = data->state;
 }
 
 // ----------------------------------------------------------------------------
@@ -376,8 +366,8 @@ static void adcOff() {
 // ----------------------------------------------------------------------------
 static void update_battery_display() {
   // Battery measurement should only happen when the ADC is enabled
-  // String percentStr = String(power.getBatteryPercent()) + "%";
-  // lv_label_set_text(ui_percent, percentStr.c_str());
+  String percentStr = String(power.getBatteryPercent()) + "%";
+  lv_label_set_text(ui_percent, percentStr.c_str());
 }
 
 // ----------------------------------------------------------------------------
@@ -403,6 +393,7 @@ void battery_update_task(lv_timer_t *timer) {
 // ----------------------------------------------------------------------------
 static void timer_button_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
+
   if (code == LV_EVENT_CLICKED) {
     // Ignore clicks that happen shortly after a long press
     if ((millis() - lastTimerLongPressTime) < DEBOUNCE_TIME_MS) {
@@ -419,33 +410,21 @@ static void timer_button_cb(lv_event_t *e) {
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-static void life_up_click_cb(lv_event_t *e) {
+static void life_up_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
-  DBG_ENTER("Up Click Callback");
+
   if (code == LV_EVENT_CLICKED) {
-    USBSerial.println("Click Event");
     // Ignore clicks that happen shortly after a long press
     if ((millis() - lastLifeUpLongPressTime) < DEBOUNCE_TIME_MS) {
       return;
     }
     life++;
     update_life_display();
-  }
-  DBG_EXIT("Up Click Callback");
-}
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-static void life_up_long_cb(lv_event_t *e) {
-  lv_event_code_t code = lv_event_get_code(e);
-  DBG_ENTER("Up Long Press Callback");
-  if (code == LV_EVENT_LONG_PRESSED) {
-    USBSerial.println("Long Pressed");
+  } else if (code == LV_EVENT_LONG_PRESSED) {
     lastLifeUpLongPressTime = millis(); // Record the time of the long press
     life = 0;
     update_life_display();
   }
-  DBG_EXIT("Up Long Press Callback");
 }
 
 // ----------------------------------------------------------------------------

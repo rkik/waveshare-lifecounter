@@ -15,12 +15,12 @@ extern void ui_Screen1_screen_init(void);
 extern void ui_Screen1_screen_destroy(void);
 extern lv_obj_t * ui_Screen1;
 extern lv_obj_t * ui_timer;
-extern lv_obj_t * ui_percent;
-extern lv_obj_t * ui_Bat;
 extern lv_obj_t * ui_lifeUp;
 extern lv_obj_t * ui_lifeDown;
 extern lv_obj_t * ui_Life;
 extern lv_obj_t * ui_minutes;
+extern lv_obj_t * ui_Bat;
+extern lv_obj_t * ui_percent;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

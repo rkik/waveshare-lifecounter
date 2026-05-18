@@ -1,0 +1,16 @@
+{
+  "codename": "qq99",
+  "ttf_path": "/assets/AGENCYB.TTF",
+  "bin_path": "/assets/ui_font_qq99.bin",
+  "c_path": "/assets/ui_font_qq99.c",
+  "cfg_path": "/assets/ui_font_qq99.fcfg",
+  "size": 300,
+  "bpp": 1,
+  "letters": 0,
+  "ranges": [
+    "0x20-0x7f"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}
