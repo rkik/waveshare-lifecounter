@@ -21,8 +21,10 @@ void ui_Screen1_screen_init(void)
 {
     ui_Screen1 = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Screen1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_color(ui_Screen1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Screen1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_object_set_themeable_style_property(ui_Screen1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_Purple);
+    ui_object_set_themeable_style_property(ui_Screen1, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_Purple);
 
     ui_timer = lv_btn_create(ui_Screen1);
     lv_obj_set_width(ui_timer, 200);
@@ -30,8 +32,10 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_x(ui_timer, 0);
     lv_obj_set_y(ui_timer, -190);
     lv_obj_set_align(ui_timer, LV_ALIGN_CENTER);
-    lv_obj_set_style_bg_color(ui_timer, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_timer, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_object_set_themeable_style_property(ui_timer, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_Purple);
+    ui_object_set_themeable_style_property(ui_timer, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_Purple);
     lv_obj_set_style_bg_img_opa(ui_timer, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_img_recolor(ui_timer, lv_color_hex(0xFAFAFA), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_img_recolor_opa(ui_timer, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -42,8 +46,10 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_x(ui_lifeUp, 0);
     lv_obj_set_y(ui_lifeUp, -60);
     lv_obj_set_align(ui_lifeUp, LV_ALIGN_CENTER);
-    lv_obj_set_style_bg_color(ui_lifeUp, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_lifeUp, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_object_set_themeable_style_property(ui_lifeUp, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_Purple);
+    ui_object_set_themeable_style_property(ui_lifeUp, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_Purple);
 
     ui_lifeDown = lv_btn_create(ui_Screen1);
     lv_obj_set_width(ui_lifeDown, 337);
@@ -51,8 +57,10 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_x(ui_lifeDown, 0);
     lv_obj_set_y(ui_lifeDown, 125);
     lv_obj_set_align(ui_lifeDown, LV_ALIGN_CENTER);
-    lv_obj_set_style_bg_color(ui_lifeDown, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_lifeDown, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_object_set_themeable_style_property(ui_lifeDown, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_Purple);
+    ui_object_set_themeable_style_property(ui_lifeDown, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_Purple);
 
     ui_Life = lv_label_create(ui_Screen1);
     lv_obj_set_width(ui_Life, LV_SIZE_CONTENT);   /// 1

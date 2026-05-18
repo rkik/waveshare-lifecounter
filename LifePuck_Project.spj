@@ -121,10 +121,12 @@
                       {
                         "nid": 10520,
                         "strtype": "_style/Bg_Color",
+                        "strval": "Purple",
+                        "integer": 1000000,
                         "intarray": [
+                          80,
                           0,
-                          0,
-                          0,
+                          100,
                           255
                         ],
                         "InheritedType": 7
@@ -273,10 +275,12 @@
                       {
                         "nid": 10520,
                         "strtype": "_style/Bg_Color",
+                        "strval": "Purple",
+                        "integer": 1000000,
                         "intarray": [
+                          80,
                           0,
-                          0,
-                          0,
+                          100,
                           255
                         ],
                         "InheritedType": 7
@@ -409,10 +413,12 @@
                       {
                         "nid": 10520,
                         "strtype": "_style/Bg_Color",
+                        "strval": "Purple",
+                        "integer": 1000000,
                         "intarray": [
+                          80,
                           0,
-                          0,
-                          0,
+                          100,
                           255
                         ],
                         "InheritedType": 7
@@ -1206,10 +1212,12 @@
                   {
                     "nid": 668053688,
                     "strtype": "_style/Bg_Color",
+                    "strval": "Purple",
+                    "integer": 1000000,
                     "intarray": [
+                      80,
                       0,
-                      0,
-                      0,
+                      100,
                       255
                     ],
                     "InheritedType": 7
@@ -1276,7 +1284,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 313,
+    "backup_cnt": 314,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "imagebytearrayprefix": null,
@@ -1287,7 +1295,7 @@
     "naming": null,
     "naming_force_lowercase": false,
     "naming_add_subcomponent": false,
-    "nidcnt": 0,
+    "nidcnt": 1000001,
     "BitDepth": 16,
     "Name": "SquareLine_Project"
   }
