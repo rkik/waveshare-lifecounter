@@ -69,7 +69,7 @@ lv_timer_t *batteryUpdateTimer = nullptr;
 // PMU object
 XPowersPMU power;
 
-uint8_t dbg_buffer[30];
+char dbg_buffer[30];
 
 // ----------------------------------------------------------------------------
 // Static Function Prototypes (Declarations)
@@ -270,13 +270,13 @@ static void Arduino_IIC_Touch_Interrupt(void) {
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-#if LV_USE_LOG != 0
+// #if LV_USE_LOG != 0
 /* Serial debugging */
 static void my_print(const char *buf) {
   USBSerial.printf(buf);
   USBSerial.flush();
 }
-#endif
+// #endif
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -348,7 +348,7 @@ static void update_minutes_display() {
 // ----------------------------------------------------------------------------
 static void update_life_display() {
   char buffer[8];
-  snprintf(buffer, sizeof(buffer), "%lu", life);
+  snprintf(buffer, sizeof(buffer), "%i", life);
   lv_label_set_text(ui_Life, buffer);
 }
 
@@ -356,10 +356,8 @@ static void update_life_display() {
 // ----------------------------------------------------------------------------
 static void update_temp_life_display() {
   char buffer[8];
-  snprintf(buffer, sizeof(buffer), "%l", tempLife);
+  snprintf(buffer, sizeof(buffer), "%i", tempLife);
   lv_label_set_text(ui_tempLife, buffer);
-  lv_timer_reset(lifeUpdateTimer);
-  lv_timer_ready(lifeUpdateTimer);
 }
 
 // ----------------------------------------------------------------------------
@@ -420,9 +418,12 @@ void battery_update_task(lv_timer_t *timer) {
 // ----------------------------------------------------------------------------
 void life_update_task(lv_timer_t *timer) {
   life += tempLife;
+  if (life < 0) {
+    life = 0;
+  }
  
-  sprintf(dbg_buffer, sizeof(dbg_buffer), "LUT: tempLife: %l - life: %l", tempLife, life);
-  USBSerial.println(dbg_buffer);
+  snprintf(dbg_buffer, sizeof(dbg_buffer), "LUT: tempLife: %d - life: %d\n", tempLife, life);
+  my_print(dbg_buffer);
 
   tempLife = 0;
   update_life_display();
@@ -458,7 +459,6 @@ static void life_up_cb(lv_event_t *e) {
     if ((millis() - lastLifeUpLongPressTime) < DEBOUNCE_TIME_MS) {
       return;
     }
-    // life++;
     
     temp_life_update(1);
   } else if (code == LV_EVENT_LONG_PRESSED) {
@@ -473,10 +473,6 @@ static void life_up_cb(lv_event_t *e) {
 // ----------------------------------------------------------------------------
 static void life_down_cb(lv_event_t *e) {
   if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
-    // if (life > 0) {
-    //   life--;
-    //   update_life_display();
-    // }
     temp_life_update(-1);
   }
 }
@@ -485,11 +481,11 @@ static void life_down_cb(lv_event_t *e) {
 // ----------------------------------------------------------------------------
 static void temp_life_update(int value) {
     tempLife += value;
-    sprintf(dbg_buffer, sizeof(dbg_buffer), "TLU: val: %l - tempLife: %l", value, tempLife);
-    USBSerial.println(dbg_buffer);
+    snprintf(dbg_buffer, sizeof(dbg_buffer), "TLU: val: %d - tempLife: %d\n", value, tempLife);
+    my_print(dbg_buffer);
 
     update_temp_life_display();
     lv_timer_reset(lifeUpdateTimer);
-    lv_timer_ready(lifeUpdateTimer);
+    lv_timer_resume(lifeUpdateTimer);
 }
 
