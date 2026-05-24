@@ -46,7 +46,8 @@ uint32_t lastMillis;
 
 // --- App state variables ---
 bool timerRunning = false;
-uint32_t countdownSeconds = 55 * 60; // Initial countdown time: 55 minutes
+uint32_t countDownMaxSeconds = 55 * 60; // Initial countdown time: 55 minutes
+uint32_t countdownSeconds = countDownMaxSeconds; 
 int32_t life = 0; // Life counter
 int32_t tempLife = 0; // Life counter
 static uint8_t lifeCount = 0;
@@ -83,6 +84,7 @@ static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t
 static void example_increase_lvgl_tick(void *arg);
 static void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data);
 static void temp_life_update(int value);
+static void timer_reset();
 
 // Button callbacks
 static void timer_button_cb(lv_event_t *e);
@@ -91,6 +93,7 @@ static void life_up_long_cb(lv_event_t *e);
 static void life_down_cb(lv_event_t *e);
 static void settings_enter_cb(lv_event_t *e);
 static void settings_back_cb(lv_event_t *e);
+static void top_cut_timer_cb(lv_event_t *e);
 
 // Timer tasks
 static void battery_update_task(lv_timer_t *timer);
@@ -194,6 +197,9 @@ void setup() {
   lv_obj_add_event_cb(ui_lifeUp, life_up_cb, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_lifeUp, life_up_cb, LV_EVENT_LONG_PRESSED , NULL);
   lv_obj_add_event_cb(ui_lifeDown, life_down_cb, LV_EVENT_CLICKED, NULL);
+
+  // Settings
+  lv_obj_add_event_cb(ui_topCutTimerEnable, top_cut_timer_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
   // Add screen change buttong
   lv_obj_add_event_cb(ui_settingsButton, settings_enter_cb, LV_EVENT_CLICKED, NULL);
@@ -439,8 +445,8 @@ void life_update_task(lv_timer_t *timer) {
     life = 0;
   }
  
-  snprintf(dbg_buffer, sizeof(dbg_buffer), "LUT: tempLife: %d - life: %d\n", tempLife, life);
-  my_print(dbg_buffer);
+  // snprintf(dbg_buffer, sizeof(dbg_buffer), "LUT: tempLife: %d - life: %d\n", tempLife, life);
+  // my_print(dbg_buffer);
 
   tempLife = 0;
   update_life_display();
@@ -460,10 +466,16 @@ static void timer_button_cb(lv_event_t *e) {
     timerRunning = !timerRunning;
   } else if (code == LV_EVENT_LONG_PRESSED) {
     lastTimerLongPressTime = millis(); // Record the time of the long press
-    countdownSeconds = 55 * 60;
+    timer_reset();
+  }
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void timer_reset() {  
+    countdownSeconds = countDownMaxSeconds;
     update_minutes_display();
     timerRunning = false;
-  }
 }
 
 // ----------------------------------------------------------------------------
@@ -497,15 +509,33 @@ static void life_down_cb(lv_event_t *e) {
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static void settings_enter_cb(lv_event_t *e) {
-    snprintf(dbg_buffer, sizeof(dbg_buffer), "Screen: %s", lv_scr_act());
-    my_print(dbg_buffer);
+    // snprintf(dbg_buffer, sizeof(dbg_buffer), "Screen: %s", lv_scr_act());
+    // my_print(dbg_buffer);
+    lv_scr_load(ui_Settings);
 }
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static void settings_back_cb(lv_event_t *e) {
-    snprintf(dbg_buffer, sizeof(dbg_buffer), "Screen: %s", lv_scr_act());
-    my_print(dbg_buffer);
+    // snprintf(dbg_buffer, sizeof(dbg_buffer), "Screen: %s", lv_scr_act());
+    // my_print(dbg_buffer);
+    lv_scr_load(ui_MainScreen);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void top_cut_timer_cb(lv_event_t *e) {
+    // snprintf(dbg_buffer, sizeof(dbg_buffer), "State: %s\n", lv_obj_has_state(ui_topCutTimerEnable, LV_STATE_CHECKED) ? "On" : "Off");
+    // my_print(dbg_buffer);
+
+    if (lv_obj_has_state(ui_topCutTimerEnable, LV_STATE_CHECKED)) {
+      countDownMaxSeconds = 75 * 60;
+    } else {
+      countDownMaxSeconds = 55 * 60;
+    }
+    
+    // Reset the timer value and pause it
+    timer_reset();
 }
 
 // ----------------------------------------------------------------------------

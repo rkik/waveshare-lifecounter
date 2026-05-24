@@ -19,17 +19,20 @@ void ui_Settings_screen_init(void)
     lv_obj_clear_flag(ui_Settings, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_topCutTimerEnable = lv_switch_create(ui_Settings);
-    lv_obj_set_width(ui_topCutTimerEnable, 50);
-    lv_obj_set_height(ui_topCutTimerEnable, 25);
+    lv_obj_set_width(ui_topCutTimerEnable, 70);
+    lv_obj_set_height(ui_topCutTimerEnable, 35);
+    lv_obj_set_x(ui_topCutTimerEnable, 90);
+    lv_obj_set_y(ui_topCutTimerEnable, -100);
     lv_obj_set_align(ui_topCutTimerEnable, LV_ALIGN_CENTER);
 
     ui_topCutTimerText = lv_label_create(ui_Settings);
     lv_obj_set_width(ui_topCutTimerText, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_topCutTimerText, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_topCutTimerText, -91);
-    lv_obj_set_y(ui_topCutTimerText, 1);
+    lv_obj_set_x(ui_topCutTimerText, -50);
+    lv_obj_set_y(ui_topCutTimerText, -100);
     lv_obj_set_align(ui_topCutTimerText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_topCutTimerText, "Top cut timer");
+    lv_obj_set_style_text_font(ui_topCutTimerText, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_settingsBack = lv_imgbtn_create(ui_Settings);
     lv_imgbtn_set_src(ui_settingsBack, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_387995924, NULL);
