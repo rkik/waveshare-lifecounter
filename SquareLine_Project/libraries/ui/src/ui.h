@@ -29,7 +29,8 @@ extern "C" {
 
 ///////////////////// SCREENS ////////////////////
 
-#include "ui_Screen1.h"
+#include "ui_MainScreen.h"
+#include "ui_Settings.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -40,6 +41,7 @@ extern lv_obj_t * ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
 LV_IMG_DECLARE(ui_img_1791433664);    // assets/gear-icon-png-2246-80x64.png
+LV_IMG_DECLARE(ui_img_387995924);    // assets/icons8-back-arrow-48.png
 
 // FONTS
 LV_FONT_DECLARE(ui_font_bat);

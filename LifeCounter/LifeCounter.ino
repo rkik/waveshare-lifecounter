@@ -82,19 +82,27 @@ static void Arduino_IIC_Touch_Interrupt(void);
 static void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
 static void example_increase_lvgl_tick(void *arg);
 static void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data);
-static void update_minutes_display();
-static void update_life_display();
-static void update_battery_display();
-static void countdown_task(lv_timer_t *timer);
+static void temp_life_update(int value);
+
+// Button callbacks
 static void timer_button_cb(lv_event_t *e);
 static void life_up_click_cb(lv_event_t *e);
 static void life_up_long_cb(lv_event_t *e);
 static void life_down_cb(lv_event_t *e);
+static void settings_enter_cb(lv_event_t *e);
+static void settings_back_cb(lv_event_t *e);
+
+// Timer tasks
 static void battery_update_task(lv_timer_t *timer);
 static void life_update_task(lv_timer_t *timer);
-static void temp_life_update(int value);
+static void countdown_task(lv_timer_t *timer);
+
+// Display updates
 static void update_temp_life_display();
 static void reset_temp_life_display();
+static void update_minutes_display();
+static void update_life_display();
+static void update_battery_display();
 
 // ----------------------------------------------------------------------------
 // Class Objects
@@ -179,13 +187,17 @@ void setup() {
   // Initialize the UI created with SquareLine Studio
   ui_init();
 
-  // Add a single event callback to the timer and lifeUp buttons to handle all events.
+  // Add event callbacks to the timer and lifeUp buttons to handle the main events.
   // The logic inside the callback now correctly distinguishes between click and long press.
   lv_obj_add_event_cb(ui_timer, timer_button_cb, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_timer, timer_button_cb, LV_EVENT_LONG_PRESSED, NULL);
   lv_obj_add_event_cb(ui_lifeUp, life_up_cb, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_lifeUp, life_up_cb, LV_EVENT_LONG_PRESSED , NULL);
   lv_obj_add_event_cb(ui_lifeDown, life_down_cb, LV_EVENT_CLICKED, NULL);
+
+  // Add screen change buttong
+  lv_obj_add_event_cb(ui_settingsButton, settings_enter_cb, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_settingsBack, settings_back_cb, LV_EVENT_CLICKED, NULL);
 
   // Initial display updates
   update_minutes_display();
@@ -356,7 +368,12 @@ static void update_life_display() {
 // ----------------------------------------------------------------------------
 static void update_temp_life_display() {
   char buffer[8];
-  snprintf(buffer, sizeof(buffer), "%i", tempLife);
+  if (tempLife > 0) {
+    // Add a plus sign to the text
+    snprintf(buffer, sizeof(buffer), "+%i", tempLife);
+  } else {
+    snprintf(buffer, sizeof(buffer), "%i", tempLife);
+  }
   lv_label_set_text(ui_tempLife, buffer);
 }
 
@@ -479,10 +496,24 @@ static void life_down_cb(lv_event_t *e) {
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+static void settings_enter_cb(lv_event_t *e) {
+    snprintf(dbg_buffer, sizeof(dbg_buffer), "Screen: %s", lv_scr_act());
+    my_print(dbg_buffer);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void settings_back_cb(lv_event_t *e) {
+    snprintf(dbg_buffer, sizeof(dbg_buffer), "Screen: %s", lv_scr_act());
+    my_print(dbg_buffer);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 static void temp_life_update(int value) {
     tempLife += value;
-    snprintf(dbg_buffer, sizeof(dbg_buffer), "TLU: val: %d - tempLife: %d\n", value, tempLife);
-    my_print(dbg_buffer);
+    // snprintf(dbg_buffer, sizeof(dbg_buffer), "TLU: val: %d - tempLife: %d\n", value, tempLife);
+    // my_print(dbg_buffer);
 
     update_temp_life_display();
     lv_timer_reset(lifeUpdateTimer);
