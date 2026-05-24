@@ -1,0 +1,21 @@
+{
+  "deftheme": {
+    "name": "Default",
+    "properties": [
+      {
+        "nid": 1000000,
+        "strtype": "THEME_COLOR",
+        "strval": "Purple",
+        "intarray": [
+          80,
+          0,
+          100,
+          255
+        ],
+        "InheritedType": 0
+      }
+    ]
+  },
+  "themes": [],
+  "selected_theme": "Default"
+}

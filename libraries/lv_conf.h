@@ -85,7 +85,7 @@
 
 /*Use a custom tick source that tells the elapsed time in milliseconds.
  *It removes the need to manually update the tick with `lv_tick_inc()`)*/
-#define LV_TICK_CUSTOM 0
+#define LV_TICK_CUSTOM 1
 #if LV_TICK_CUSTOM
     #define LV_TICK_CUSTOM_INCLUDE "Arduino.h"         /*Header for the system time function*/
     #define LV_TICK_CUSTOM_SYS_TIME_EXPR (millis())    /*Expression evaluating to current system time in ms*/
@@ -97,6 +97,16 @@
 /*Default Dot Per Inch. Used to initialize default sizes such as widgets sized, style paddings.
  *(Not so important, you can adjust it to modify default sizes and spaces)*/
 #define LV_DPI_DEF 130     /*[px/inch]*/
+
+/*====================
+   INPUT DEVICE SETTINGS
+ *====================*/
+
+/*Input device long press time in milliseconds*/
+#define LV_INDEV_LONG_PRESS_TIME 800
+
+/*Input device long press repetition time in milliseconds*/
+#define LV_INDEV_LONG_PRESS_REP_TIME 300
 
 /*=======================
  * FEATURE CONFIGURATION
@@ -240,7 +250,7 @@
     *LV_LOG_LEVEL_ERROR       Only critical issue, when the system may fail
     *LV_LOG_LEVEL_USER        Only logs added by the user
     *LV_LOG_LEVEL_NONE        Do not log anything*/
-    #define LV_LOG_LEVEL LV_LOG_LEVEL_WARN
+    #define LV_LOG_LEVEL LV_LOG_LEVEL_TRACE
 
     /*1: Print the log with 'printf';
     *0: User need to register a callback with `lv_log_register_print_cb()`*/
