@@ -47,8 +47,10 @@ uint32_t lastMillis;
 // --- App state variables ---
 bool timerRunning = false;
 uint32_t countdownSeconds = 55 * 60; // Initial countdown time: 55 minutes
-uint32_t life = 0; // Life counter
+int32_t life = 0; // Life counter
+int32_t tempLife = 0; // Life counter
 static uint8_t lifeCount = 0;
+lv_timer_t *lifeUpdateTimer = nullptr;
 
 lv_timer_t *countdownTimer = nullptr; // LVGL timer for countdown
 
@@ -66,6 +68,8 @@ lv_timer_t *batteryUpdateTimer = nullptr;
 
 // PMU object
 XPowersPMU power;
+
+uint8_t dbg_buffer[30];
 
 // ----------------------------------------------------------------------------
 // Static Function Prototypes (Declarations)
@@ -87,6 +91,10 @@ static void life_up_click_cb(lv_event_t *e);
 static void life_up_long_cb(lv_event_t *e);
 static void life_down_cb(lv_event_t *e);
 static void battery_update_task(lv_timer_t *timer);
+static void life_update_task(lv_timer_t *timer);
+static void temp_life_update(int value);
+static void update_temp_life_display();
+static void reset_temp_life_display();
 
 // ----------------------------------------------------------------------------
 // Class Objects
@@ -187,6 +195,8 @@ void setup() {
   // Create LVGL timers
   countdownTimer = lv_timer_create(countdown_task, 1000, NULL);
   batteryUpdateTimer = lv_timer_create(battery_update_task, BATTERY_UPDATE_INTERVAL_MS, NULL);
+  lifeUpdateTimer = lv_timer_create(life_update_task, 1000, NULL);
+  lv_timer_pause(lifeUpdateTimer);
 }
 
 // ----------------------------------------------------------------------------
@@ -344,6 +354,23 @@ static void update_life_display() {
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+static void update_temp_life_display() {
+  char buffer[8];
+  snprintf(buffer, sizeof(buffer), "%l", tempLife);
+  lv_label_set_text(ui_tempLife, buffer);
+  lv_timer_reset(lifeUpdateTimer);
+  lv_timer_ready(lifeUpdateTimer);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void reset_temp_life_display() {
+  lv_label_set_text(ui_tempLife, "");
+  lv_timer_pause(lifeUpdateTimer);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 static void adcOn() {
   power.enableTemperatureMeasure();
   power.enableBattDetection();
@@ -391,6 +418,19 @@ void battery_update_task(lv_timer_t *timer) {
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+void life_update_task(lv_timer_t *timer) {
+  life += tempLife;
+ 
+  sprintf(dbg_buffer, sizeof(dbg_buffer), "LUT: tempLife: %l - life: %l", tempLife, life);
+  USBSerial.println(dbg_buffer);
+
+  tempLife = 0;
+  update_life_display();
+  lv_timer_pause(lifeUpdateTimer);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 static void timer_button_cb(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
 
@@ -418,12 +458,14 @@ static void life_up_cb(lv_event_t *e) {
     if ((millis() - lastLifeUpLongPressTime) < DEBOUNCE_TIME_MS) {
       return;
     }
-    life++;
-    update_life_display();
+    // life++;
+    
+    temp_life_update(1);
   } else if (code == LV_EVENT_LONG_PRESSED) {
     lastLifeUpLongPressTime = millis(); // Record the time of the long press
     life = 0;
     update_life_display();
+    reset_temp_life_display();
   }
 }
 
@@ -431,9 +473,23 @@ static void life_up_cb(lv_event_t *e) {
 // ----------------------------------------------------------------------------
 static void life_down_cb(lv_event_t *e) {
   if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
-    if (life > 0) {
-      life--;
-      update_life_display();
-    }
+    // if (life > 0) {
+    //   life--;
+    //   update_life_display();
+    // }
+    temp_life_update(-1);
   }
 }
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void temp_life_update(int value) {
+    tempLife += value;
+    sprintf(dbg_buffer, sizeof(dbg_buffer), "TLU: val: %l - tempLife: %l", value, tempLife);
+    USBSerial.println(dbg_buffer);
+
+    update_temp_life_display();
+    lv_timer_reset(lifeUpdateTimer);
+    lv_timer_ready(lifeUpdateTimer);
+}
+

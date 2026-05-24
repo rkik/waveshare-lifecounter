@@ -38,6 +38,9 @@ extern "C" {
 
 extern lv_obj_t * ui____initial_actions0;
 
+// IMAGES AND IMAGE SETS
+LV_IMG_DECLARE(ui_img_1791433664);    // assets/gear-icon-png-2246-80x64.png
+
 // FONTS
 LV_FONT_DECLARE(ui_font_bat);
 LV_FONT_DECLARE(ui_font_big);

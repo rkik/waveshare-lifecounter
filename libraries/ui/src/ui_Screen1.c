@@ -5,6 +5,7 @@
 
 #include "ui.h"
 
+lv_obj_t * uic_settingsButton;
 lv_obj_t * ui_Screen1 = NULL;
 lv_obj_t * ui_timer = NULL;
 lv_obj_t * ui_lifeUp = NULL;
@@ -13,6 +14,8 @@ lv_obj_t * ui_Life = NULL;
 lv_obj_t * ui_minutes = NULL;
 lv_obj_t * ui_Bat = NULL;
 lv_obj_t * ui_percent = NULL;
+lv_obj_t * ui_settingsButton = NULL;
+lv_obj_t * ui_tempLife = NULL;
 // event funtions
 
 // build funtions
@@ -104,6 +107,25 @@ void ui_Screen1_screen_init(void)
     lv_obj_set_style_text_opa(ui_percent, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_percent, &lv_font_montserrat_26, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_settingsButton = lv_imgbtn_create(ui_Screen1);
+    lv_imgbtn_set_src(ui_settingsButton, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_1791433664, NULL);
+    lv_imgbtn_set_src(ui_settingsButton, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_1791433664, NULL);
+    lv_obj_set_width(ui_settingsButton, 80);
+    lv_obj_set_height(ui_settingsButton, 64);
+    lv_obj_set_x(ui_settingsButton, -142);
+    lv_obj_set_y(ui_settingsButton, -190);
+    lv_obj_set_align(ui_settingsButton, LV_ALIGN_CENTER);
+
+    ui_tempLife = lv_label_create(ui_Screen1);
+    lv_obj_set_width(ui_tempLife, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_tempLife, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_tempLife, -130);
+    lv_obj_set_y(ui_tempLife, 0);
+    lv_obj_set_align(ui_tempLife, LV_ALIGN_CENTER);
+    lv_obj_set_style_text_font(ui_tempLife, &lv_font_montserrat_30, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    uic_settingsButton = ui_settingsButton;
+
 }
 
 void ui_Screen1_screen_destroy(void)
@@ -119,5 +141,8 @@ void ui_Screen1_screen_destroy(void)
     ui_minutes = NULL;
     ui_Bat = NULL;
     ui_percent = NULL;
+    uic_settingsButton = NULL;
+    ui_settingsButton = NULL;
+    ui_tempLife = NULL;
 
 }

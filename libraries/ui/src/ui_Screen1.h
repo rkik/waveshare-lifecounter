@@ -21,7 +21,10 @@ extern lv_obj_t * ui_Life;
 extern lv_obj_t * ui_minutes;
 extern lv_obj_t * ui_Bat;
 extern lv_obj_t * ui_percent;
+extern lv_obj_t * ui_settingsButton;
+extern lv_obj_t * ui_tempLife;
 // CUSTOM VARIABLES
+extern lv_obj_t * uic_settingsButton;
 
 #ifdef __cplusplus
 } /*extern "C"*/
