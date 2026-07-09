@@ -25,6 +25,14 @@
 #define DBG_ENTER(x) {USBSerial.print("Enter "); USBSerial.println(x);}
 #define DBG_EXIT(x) {USBSerial.print("Exit "); USBSerial.println(x);}
 
+#define LIFE_LOG_ENTRY_MAX (50)
+
+typedef struct {
+  uint32_t timestamp;
+  int lifeChange;
+  int lifeTotal;
+} LIFE_LOG_S;
+
 // ----------------------------------------------------------------------------
 // Global Variables
 // ----------------------------------------------------------------------------
@@ -48,6 +56,7 @@ uint32_t lastMillis;
 bool timerRunning = false;
 uint32_t countDownMaxSeconds = 55 * 60; // Initial countdown time: 55 minutes
 uint32_t countdownSeconds = countDownMaxSeconds; 
+uint32_t logTimerSeconds = 0; 
 int32_t life = 0; // Life counter
 int32_t tempLife = 0; // Life counter
 static uint8_t lifeCount = 0;
@@ -57,11 +66,14 @@ lv_timer_t *countdownTimer = nullptr; // LVGL timer for countdown
 
 uint32_t dbg_counter = 0;
 
+uint8_t LifeLogIndex = 0;
+static LIFE_LOG_S LifeLog[LIFE_LOG_ENTRY_MAX];
+
 // --- Timestamps for long press debounce ---
 static uint32_t pressTime;
 unsigned long lastTimerLongPressTime = 0;
 unsigned long lastLifeUpLongPressTime = 0;
-const unsigned long DEBOUNCE_TIME_MS = 500;
+const unsigned long DEBOUNCE_TIME_MS = 700;
 
 // --- Battery and Sleep Optimization Variables ---
 const unsigned long BATTERY_UPDATE_INTERVAL_MS = 30000; // Update battery every 30 seconds
@@ -85,6 +97,9 @@ static void example_increase_lvgl_tick(void *arg);
 static void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data);
 static void temp_life_update(int value);
 static void timer_reset();
+static void add_log_entry(int value);
+static void reset_log(void);
+static void display_log(void);
 
 // Button callbacks
 static void timer_button_cb(lv_event_t *e);
@@ -423,7 +438,10 @@ static void update_battery_display() {
 static void countdown_task(lv_timer_t *timer) {
   if (timerRunning && countdownSeconds > 0) {
     countdownSeconds--;
+    logTimerSeconds = countdownSeconds;
     update_minutes_display();
+  } else {
+    logTimerSeconds++;
   }
 }
 
@@ -444,6 +462,9 @@ void life_update_task(lv_timer_t *timer) {
   if (life < 0) {
     life = 0;
   }
+
+  // Log the change in life
+  add_log_entry(tempLife, life);
  
   // snprintf(dbg_buffer, sizeof(dbg_buffer), "LUT: tempLife: %d - life: %d\n", tempLife, life);
   // my_print(dbg_buffer);
@@ -495,6 +516,7 @@ static void life_up_cb(lv_event_t *e) {
     life = 0;
     update_life_display();
     reset_temp_life_display();
+    reset_log();
   }
 }
 
@@ -549,4 +571,44 @@ static void temp_life_update(int value) {
     lv_timer_reset(lifeUpdateTimer);
     lv_timer_resume(lifeUpdateTimer);
 }
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void add_log_entry(int lifeChange, int lifeTotal) {
+  // Timestamps
+  // - if timer running use the value of the timer
+  // - if not running, keep track of time since health was last reset
+  LifeLog[LifeLogIndex].lifeChange = lifeChange;
+  LifeLog[LifeLogIndex].lifeTotal = lifeTotal;
+  LifeLog[LifeLogIndex].timestamp = logTimerSeconds;
+  LifeLogIndex++;
+
+  // Temp for debug
+  display_log();
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void reset_log(void) {
+  logTimerSeconds = 0;
+  LifeLogIndex = 0;
+  memset(LifeLog, 0, sizeof(LifeLog));
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void display_log(void) {
+  for (uint8_t i; i < LifeLogIndex; i++) {
+    int log_minutes = LifeLog[i].timestamp / 60;
+    int log_seconds = LifeLog[i].timestamp % 60;
+    snprintf(dbg_buffer, sizeof(dbg_buffer), "%d: %02d:%02d | %+3d -> %2d\n", 
+            i, 
+            log_minutes,
+            log_seconds,
+            LifeLog[i].lifeChange,
+            LifeLog[i].lifeTotal);
+    my_print(dbg_buffer);
+  }
+}
+
 

@@ -53,6 +53,10 @@ void ui_MainScreen_screen_init(void)
                                            _ui_theme_color_Purple);
     ui_object_set_themeable_style_property(ui_lifeUp, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
                                            _ui_theme_alpha_Purple);
+    ui_object_set_themeable_style_property(ui_lifeUp, LV_PART_MAIN | LV_STATE_PRESSED, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_Red);
+    ui_object_set_themeable_style_property(ui_lifeUp, LV_PART_MAIN | LV_STATE_PRESSED, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_Red);
 
     ui_lifeDown = lv_btn_create(ui_MainScreen);
     lv_obj_set_width(ui_lifeDown, 337);
@@ -64,6 +68,10 @@ void ui_MainScreen_screen_init(void)
                                            _ui_theme_color_Purple);
     ui_object_set_themeable_style_property(ui_lifeDown, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
                                            _ui_theme_alpha_Purple);
+    ui_object_set_themeable_style_property(ui_lifeDown, LV_PART_MAIN | LV_STATE_PRESSED, LV_STYLE_BG_COLOR,
+                                           _ui_theme_color_Green);
+    ui_object_set_themeable_style_property(ui_lifeDown, LV_PART_MAIN | LV_STATE_PRESSED, LV_STYLE_BG_OPA,
+                                           _ui_theme_alpha_Green);
 
     ui_Life = lv_label_create(ui_MainScreen);
     lv_obj_set_width(ui_Life, LV_SIZE_CONTENT);   /// 1

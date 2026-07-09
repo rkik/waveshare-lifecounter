@@ -11,11 +11,19 @@ extern "C" {
 #endif
 
 #define UI_THEME_COLOR_PURPLE 0
+#define UI_THEME_COLOR_RED 1
+#define UI_THEME_COLOR_GREEN 2
 
 #define UI_THEME_DEFAULT 0
 
 extern const ui_theme_variable_t _ui_theme_color_Purple[1];
 extern const ui_theme_variable_t _ui_theme_alpha_Purple[1];
+
+extern const ui_theme_variable_t _ui_theme_color_Red[1];
+extern const ui_theme_variable_t _ui_theme_alpha_Red[1];
+
+extern const ui_theme_variable_t _ui_theme_color_Green[1];
+extern const ui_theme_variable_t _ui_theme_alpha_Green[1];
 
 extern const uint32_t * ui_theme_colors[1];
 extern const uint8_t * ui_theme_alphas[1];

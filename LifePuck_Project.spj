@@ -260,7 +260,6 @@
               },
               {
                 "nid": 320,
-                "flags": 1048576,
                 "strtype": "OBJECT/States",
                 "InheritedType": 1
               },
@@ -281,6 +280,28 @@
                           80,
                           0,
                           100,
+                          255
+                        ],
+                        "InheritedType": 7
+                      }
+                    ],
+                    "InheritedType": 1
+                  },
+                  {
+                    "nid": 30000,
+                    "strtype": "_style/StyleState",
+                    "strval": "PRESSED",
+                    "childs": [
+                      {
+                        "nid": 30520,
+                        "flags": 4096,
+                        "strtype": "_style/Bg_Color",
+                        "strval": "Red",
+                        "integer": 1000001,
+                        "intarray": [
+                          255,
+                          0,
+                          0,
                           255
                         ],
                         "InheritedType": 7
@@ -398,7 +419,6 @@
               },
               {
                 "nid": 320,
-                "flags": 1048576,
                 "strtype": "OBJECT/States",
                 "InheritedType": 1
               },
@@ -419,6 +439,28 @@
                           80,
                           0,
                           100,
+                          255
+                        ],
+                        "InheritedType": 7
+                      }
+                    ],
+                    "InheritedType": 1
+                  },
+                  {
+                    "nid": 30000,
+                    "strtype": "_style/StyleState",
+                    "strval": "PRESSED",
+                    "childs": [
+                      {
+                        "nid": 30520,
+                        "flags": 4096,
+                        "strtype": "_style/Bg_Color",
+                        "strval": "Green",
+                        "integer": 1000002,
+                        "intarray": [
+                          0,
+                          255,
+                          0,
                           255
                         ],
                         "InheritedType": 7
@@ -542,7 +584,6 @@
               },
               {
                 "nid": 320,
-                "flags": 1048576,
                 "strtype": "OBJECT/States",
                 "InheritedType": 1
               },
@@ -1247,25 +1288,25 @@
               {
                 "nid": 1050,
                 "strtype": "IMGBUTTON/Image_disabled",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1060,
                 "strtype": "IMGBUTTON/Image_checked_released",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1070,
                 "strtype": "IMGBUTTON/Image_checked_pressed",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1080,
                 "strtype": "IMGBUTTON/Image_checked_disabled",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
@@ -1993,31 +2034,31 @@
               {
                 "nid": 1040,
                 "strtype": "IMGBUTTON/Image_pressed",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1050,
                 "strtype": "IMGBUTTON/Image_disabled",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1060,
                 "strtype": "IMGBUTTON/Image_checked_released",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1070,
                 "strtype": "IMGBUTTON/Image_checked_pressed",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1080,
                 "strtype": "IMGBUTTON/Image_checked_disabled",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
@@ -2156,7 +2197,7 @@
   },
   "animations": [],
   "selected_theme": "Default",
-  "selected_screen": "GUID56360790-565130S4075144",
+  "selected_screen": "GUID55036971-434371S794489",
   "info": {
     "name": "SquareLine_Project.spj",
     "depth": 1,
@@ -2185,7 +2226,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 320,
+    "backup_cnt": 322,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "imagebytearrayprefix": null,
@@ -2196,7 +2237,7 @@
     "naming": null,
     "naming_force_lowercase": false,
     "naming_add_subcomponent": false,
-    "nidcnt": 1000001,
+    "nidcnt": 1000003,
     "BitDepth": 16,
     "Name": "SquareLine_Project"
   }

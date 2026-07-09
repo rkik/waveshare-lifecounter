@@ -13,6 +13,30 @@
           255
         ],
         "InheritedType": 0
+      },
+      {
+        "nid": 1000001,
+        "strtype": "THEME_COLOR",
+        "strval": "Red",
+        "intarray": [
+          255,
+          0,
+          0,
+          255
+        ],
+        "InheritedType": 0
+      },
+      {
+        "nid": 1000002,
+        "strtype": "THEME_COLOR",
+        "strval": "Green",
+        "intarray": [
+          0,
+          255,
+          0,
+          255
+        ],
+        "InheritedType": 0
       }
     ]
   },
