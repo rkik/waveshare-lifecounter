@@ -17,6 +17,8 @@ extern lv_obj_t * ui_Settings;
 extern lv_obj_t * ui_topCutTimerEnable;
 extern lv_obj_t * ui_topCutTimerText;
 extern lv_obj_t * ui_settingsBack;
+extern lv_obj_t * ui_LogButton;
+extern lv_obj_t * ui_logButtonLabel;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

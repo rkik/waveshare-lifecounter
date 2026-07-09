@@ -31,6 +31,7 @@ extern "C" {
 
 #include "ui_MainScreen.h"
 #include "ui_Settings.h"
+#include "ui_LogScreen.h"
 
 ///////////////////// VARIABLES ////////////////////
 

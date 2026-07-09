@@ -83,6 +83,7 @@ lv_timer_t *batteryUpdateTimer = nullptr;
 XPowersPMU power;
 
 char dbg_buffer[30];
+char log_buffer[30];
 
 // ----------------------------------------------------------------------------
 // Static Function Prototypes (Declarations)
@@ -109,6 +110,8 @@ static void life_down_cb(lv_event_t *e);
 static void settings_enter_cb(lv_event_t *e);
 static void settings_back_cb(lv_event_t *e);
 static void top_cut_timer_cb(lv_event_t *e);
+static void log_enter_cb(lv_event_t *e);
+static void log_back_cb(lv_event_t *e);
 
 // Timer tasks
 static void battery_update_task(lv_timer_t *timer);
@@ -219,6 +222,8 @@ void setup() {
   // Add screen change buttong
   lv_obj_add_event_cb(ui_settingsButton, settings_enter_cb, LV_EVENT_CLICKED, NULL);
   lv_obj_add_event_cb(ui_settingsBack, settings_back_cb, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_LogButton, log_enter_cb, LV_EVENT_CLICKED, NULL);
+  lv_obj_add_event_cb(ui_logBack, log_back_cb, LV_EVENT_CLICKED, NULL);
 
   // Initial display updates
   update_minutes_display();
@@ -546,6 +551,23 @@ static void settings_back_cb(lv_event_t *e) {
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+static void log_enter_cb(lv_event_t *e) {
+    // snprintf(dbg_buffer, sizeof(dbg_buffer), "Screen: %s", lv_scr_act());
+    // my_print(dbg_buffer);
+    lv_scr_load(ui_LogScreen);
+    display_log();
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+static void log_back_cb(lv_event_t *e) {
+    // snprintf(dbg_buffer, sizeof(dbg_buffer), "Screen: %s", lv_scr_act());
+    // my_print(dbg_buffer);
+    lv_scr_load(ui_MainScreen);
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 static void top_cut_timer_cb(lv_event_t *e) {
     // snprintf(dbg_buffer, sizeof(dbg_buffer), "State: %s\n", lv_obj_has_state(ui_topCutTimerEnable, LV_STATE_CHECKED) ? "On" : "Off");
     // my_print(dbg_buffer);
@@ -582,9 +604,6 @@ static void add_log_entry(int lifeChange, int lifeTotal) {
   LifeLog[LifeLogIndex].lifeTotal = lifeTotal;
   LifeLog[LifeLogIndex].timestamp = logTimerSeconds;
   LifeLogIndex++;
-
-  // Temp for debug
-  display_log();
 }
 
 // ----------------------------------------------------------------------------
@@ -598,16 +617,21 @@ static void reset_log(void) {
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static void display_log(void) {
+  memset(log_buffer, '\0', sizeof(log_buffer));
+
+  lv_textarea_set_text (ui_Log, log_buffer);
+
   for (uint8_t i; i < LifeLogIndex; i++) {
     int log_minutes = LifeLog[i].timestamp / 60;
     int log_seconds = LifeLog[i].timestamp % 60;
-    snprintf(dbg_buffer, sizeof(dbg_buffer), "%d: %02d:%02d | %+3d -> %2d\n", 
+    snprintf(log_buffer, sizeof(log_buffer), "%d: %02d:%02d | %+3d -> %2d\n", 
             i, 
             log_minutes,
             log_seconds,
             LifeLog[i].lifeChange,
             LifeLog[i].lifeTotal);
-    my_print(dbg_buffer);
+    // my_print(log_buffer);
+    lv_textarea_add_text(ui_Log, log_buffer);
   }
 }
 

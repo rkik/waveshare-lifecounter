@@ -9,6 +9,8 @@ lv_obj_t * ui_Settings = NULL;
 lv_obj_t * ui_topCutTimerEnable = NULL;
 lv_obj_t * ui_topCutTimerText = NULL;
 lv_obj_t * ui_settingsBack = NULL;
+lv_obj_t * ui_LogButton = NULL;
+lv_obj_t * ui_logButtonLabel = NULL;
 // event funtions
 
 // build funtions
@@ -42,6 +44,25 @@ void ui_Settings_screen_init(void)
     lv_obj_set_y(ui_settingsBack, -193);
     lv_obj_set_align(ui_settingsBack, LV_ALIGN_CENTER);
 
+    ui_LogButton = lv_btn_create(ui_Settings);
+    lv_obj_set_width(ui_LogButton, 70);
+    lv_obj_set_height(ui_LogButton, 70);
+    lv_obj_set_x(ui_LogButton, -85);
+    lv_obj_set_y(ui_LogButton, -6);
+    lv_obj_set_align(ui_LogButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_LogButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_LogButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_text_font(ui_LogButton, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_logButtonLabel = lv_label_create(ui_Settings);
+    lv_obj_set_width(ui_logButtonLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_logButtonLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_logButtonLabel, -3);
+    lv_obj_set_y(ui_logButtonLabel, -6);
+    lv_obj_set_align(ui_logButtonLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_logButtonLabel, "Log");
+    lv_obj_set_style_text_font(ui_logButtonLabel, &lv_font_montserrat_30, LV_PART_MAIN | LV_STATE_DEFAULT);
+
 }
 
 void ui_Settings_screen_destroy(void)
@@ -53,5 +74,7 @@ void ui_Settings_screen_destroy(void)
     ui_topCutTimerEnable = NULL;
     ui_topCutTimerText = NULL;
     ui_settingsBack = NULL;
+    ui_LogButton = NULL;
+    ui_logButtonLabel = NULL;
 
 }
