@@ -27,6 +27,10 @@
 
 #define LIFE_LOG_ENTRY_MAX (50)
 
+// Debounce timers
+#define PRESS_DEBOUNCE_TIME_MS      (60)
+#define LONGPRESS_DEBOUNCE_TIME_MS  (700)
+
 typedef struct {
   uint32_t timestamp;
   int lifeChange;
@@ -73,7 +77,6 @@ static LIFE_LOG_S LifeLog[LIFE_LOG_ENTRY_MAX];
 static uint32_t pressTime;
 unsigned long lastTimerLongPressTime = 0;
 unsigned long lastLifeUpLongPressTime = 0;
-const unsigned long DEBOUNCE_TIME_MS = 700;
 
 // --- Battery and Sleep Optimization Variables ---
 const unsigned long BATTERY_UPDATE_INTERVAL_MS = 30000; // Update battery every 30 seconds
@@ -365,7 +368,7 @@ static void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data
 
     // USBSerial.print("Data y ");
     // USBSerial.println(touchY);
-  } else if ((readTime - 100) > pressTime) {
+  } else if ((readTime - PRESS_DEBOUNCE_TIME_MS) > pressTime) {
     data->state = LV_INDEV_STATE_REL;
   } else {
     data->state = lastState;
@@ -486,7 +489,7 @@ static void timer_button_cb(lv_event_t *e) {
 
   if (code == LV_EVENT_CLICKED) {
     // Ignore clicks that happen shortly after a long press
-    if ((millis() - lastTimerLongPressTime) < DEBOUNCE_TIME_MS) {
+    if ((millis() - lastTimerLongPressTime) < LONGPRESS_DEBOUNCE_TIME_MS) {
       return;
     }
     timerRunning = !timerRunning;
@@ -511,7 +514,7 @@ static void life_up_cb(lv_event_t *e) {
 
   if (code == LV_EVENT_CLICKED) {
     // Ignore clicks that happen shortly after a long press
-    if ((millis() - lastLifeUpLongPressTime) < DEBOUNCE_TIME_MS) {
+    if ((millis() - lastLifeUpLongPressTime) < LONGPRESS_DEBOUNCE_TIME_MS) {
       return;
     }
     

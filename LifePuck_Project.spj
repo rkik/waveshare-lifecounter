@@ -197,7 +197,7 @@
                 "strtype": "OBJECT/Position",
                 "intarray": [
                   0,
-                  -60
+                  -50
                 ],
                 "InheritedType": 7
               },
@@ -206,8 +206,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Size",
                 "intarray": [
-                  337,
-                  194
+                  350,
+                  225
                 ],
                 "InheritedType": 7
               },
@@ -262,6 +262,12 @@
                 "nid": 320,
                 "strtype": "OBJECT/States",
                 "InheritedType": 1
+              },
+              {
+                "nid": 330,
+                "strtype": "OBJECT/Checked",
+                "strval": "True",
+                "InheritedType": 2
               },
               {
                 "part": "lv.PART.MAIN",
@@ -356,7 +362,7 @@
                 "strtype": "OBJECT/Position",
                 "intarray": [
                   0,
-                  125
+                  140
                 ],
                 "InheritedType": 7
               },
@@ -365,8 +371,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Size",
                 "intarray": [
-                  337,
-                  170
+                  350,
+                  140
                 ],
                 "InheritedType": 7
               },
@@ -421,6 +427,12 @@
                 "nid": 320,
                 "strtype": "OBJECT/States",
                 "InheritedType": 1
+              },
+              {
+                "nid": 360,
+                "strtype": "OBJECT/Pressed",
+                "strval": "True",
+                "InheritedType": 2
               },
               {
                 "part": "lv.PART.MAIN",
@@ -2034,31 +2046,31 @@
               {
                 "nid": 1040,
                 "strtype": "IMGBUTTON/Image_pressed",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1050,
                 "strtype": "IMGBUTTON/Image_disabled",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1060,
                 "strtype": "IMGBUTTON/Image_checked_released",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1070,
                 "strtype": "IMGBUTTON/Image_checked_pressed",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1080,
                 "strtype": "IMGBUTTON/Image_checked_disabled",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
@@ -2623,31 +2635,31 @@
               {
                 "nid": 1040,
                 "strtype": "IMGBUTTON/Image_pressed",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1050,
                 "strtype": "IMGBUTTON/Image_disabled",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1060,
                 "strtype": "IMGBUTTON/Image_checked_released",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1070,
                 "strtype": "IMGBUTTON/Image_checked_pressed",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
                 "nid": 1080,
                 "strtype": "IMGBUTTON/Image_checked_disabled",
-                "strval": "",
+                "strval": "-",
                 "InheritedType": 5
               },
               {
@@ -2982,7 +2994,7 @@
   },
   "animations": [],
   "selected_theme": "Default",
-  "selected_screen": "GUID56360790-565130S4075144",
+  "selected_screen": "GUID55036971-434371S794489",
   "info": {
     "name": "SquareLine_Project.spj",
     "depth": 1,
@@ -3011,7 +3023,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 326,
+    "backup_cnt": 327,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "imagebytearrayprefix": null,
